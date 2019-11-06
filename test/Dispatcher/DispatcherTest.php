@@ -43,7 +43,8 @@ abstract class DispatcherTest extends TestCase
         string $uri,
         callable $callback,
         string $handler,
-        array $argDict
+        array $argDict,
+        array $allowedMethods
     ): void {
         $dispatcher = simpleDispatcher($callback, $this->generateDispatcherOptions());
         $info = $dispatcher->dispatch($method, $uri);
@@ -51,6 +52,7 @@ abstract class DispatcherTest extends TestCase
         self::assertSame($dispatcher::FOUND, $info[0]);
         self::assertSame($handler, $info[1]);
         self::assertSame($argDict, $info[2]);
+        self::assertSame($allowedMethods, $info[3]);
     }
 
     /**
@@ -162,8 +164,9 @@ abstract class DispatcherTest extends TestCase
         $uri = '/resource/123/456';
         $handler = 'handler0';
         $argDict = [];
+        $allowedMethods = ['GET'];
 
-        $cases[] = [$method, $uri, $callback, $handler, $argDict];
+        $cases[] = [$method, $uri, $callback, $handler, $argDict, $allowedMethods];
 
         // 1 -------------------------------------------------------------------------------------->
 
@@ -177,6 +180,7 @@ abstract class DispatcherTest extends TestCase
         $uri = '/handler2';
         $handler = 'handler2';
         $argDict = [];
+        $allowedMethods = ['GET'];
 
         $cases[] = [$method, $uri, $callback, $handler, $argDict];
 
@@ -192,6 +196,7 @@ abstract class DispatcherTest extends TestCase
         $uri = '/user/rdlowrey';
         $handler = 'handler2';
         $argDict = ['name' => 'rdlowrey'];
+        $allowedMethods = ['GET'];
 
         $cases[] = [$method, $uri, $callback, $handler, $argDict];
 
@@ -203,6 +208,7 @@ abstract class DispatcherTest extends TestCase
         $uri = '/user/12345';
         $handler = 'handler1';
         $argDict = ['id' => '12345'];
+        $allowedMethods = ['GET'];
 
         $cases[] = [$method, $uri, $callback, $handler, $argDict];
 
@@ -214,6 +220,7 @@ abstract class DispatcherTest extends TestCase
         $uri = '/user/NaN';
         $handler = 'handler2';
         $argDict = ['name' => 'NaN'];
+        $allowedMethods = ['GET'];
 
         $cases[] = [$method, $uri, $callback, $handler, $argDict];
 
@@ -225,6 +232,7 @@ abstract class DispatcherTest extends TestCase
         $uri = '/user/rdlowrey/12345';
         $handler = 'handler0';
         $argDict = ['name' => 'rdlowrey', 'id' => '12345'];
+        $allowedMethods = ['GET'];
 
         $cases[] = [$method, $uri, $callback, $handler, $argDict];
 
@@ -240,6 +248,7 @@ abstract class DispatcherTest extends TestCase
         $uri = '/user/12345.svg';
         $handler = 'handler2';
         $argDict = ['id' => '12345', 'extension' => 'svg'];
+        $allowedMethods = ['GET'];
 
         $cases[] = [$method, $uri, $callback, $handler, $argDict];
 
@@ -257,6 +266,7 @@ abstract class DispatcherTest extends TestCase
         $uri = '/user/rdlowrey';
         $handler = 'handler0';
         $argDict = ['name' => 'rdlowrey'];
+        $allowedMethods = ['GET'];
 
         $cases[] = [$method, $uri, $callback, $handler, $argDict];
 
@@ -268,6 +278,7 @@ abstract class DispatcherTest extends TestCase
         $uri = '/user/rdlowrey/1234';
         $handler = 'handler1';
         $argDict = ['name' => 'rdlowrey', 'id' => '1234'];
+        $allowedMethods = ['GET'];
 
         $cases[] = [$method, $uri, $callback, $handler, $argDict];
 
@@ -279,6 +290,7 @@ abstract class DispatcherTest extends TestCase
         $uri = '/static0';
         $handler = 'handler2';
         $argDict = [];
+        $allowedMethods = ['GET'];
 
         $cases[] = [$method, $uri, $callback, $handler, $argDict];
 
@@ -290,6 +302,7 @@ abstract class DispatcherTest extends TestCase
         $uri = '/static1';
         $handler = 'handler4';
         $argDict = [];
+        $allowedMethods = ['GET', 'HEAD'];
 
         $cases[] = [$method, $uri, $callback, $handler, $argDict];
 
@@ -304,6 +317,7 @@ abstract class DispatcherTest extends TestCase
         $uri = '/user/rdlowrey';
         $handler = 'handler1';
         $argDict = ['name' => 'rdlowrey'];
+        $allowedMethods = ['POST'];
 
         $cases[] = [$method, $uri, $callback, $handler, $argDict];
 
@@ -319,6 +333,7 @@ abstract class DispatcherTest extends TestCase
         $uri = '/user/rdlowrey';
         $handler = 'handler1';
         $argDict = ['name' => 'rdlowrey'];
+        $allowedMethods = ['POST'];
 
         $cases[] = [$method, $uri, $callback, $handler, $argDict];
 
@@ -333,6 +348,7 @@ abstract class DispatcherTest extends TestCase
         $uri = '/user/rdlowrey/edit';
         $handler = 'handler1';
         $argDict = ['name' => 'rdlowrey'];
+        $allowedMethods = ['GET'];
 
         $cases[] = [$method, $uri, $callback, $handler, $argDict];
 
@@ -345,6 +361,7 @@ abstract class DispatcherTest extends TestCase
         };
 
         $argDict = [];
+        $allowedMethods = ['GET', 'POST', 'DELETE'];
         $cases[] = ['GET', '/user', $callback, 'handlerGetPost', $argDict];
         $cases[] = ['POST', '/user', $callback, 'handlerGetPost', $argDict];
         $cases[] = ['DELETE', '/user', $callback, 'handlerDelete', $argDict];
@@ -356,6 +373,7 @@ abstract class DispatcherTest extends TestCase
             $r->addRoute('GET', '/{entity}.json', 'handler1');
         };
 
+        $allowedMethods = ['GET'];
         $cases[] = ['GET', '/user.json', $callback, 'handler1', ['entity' => 'user']];
 
         // 18 ----
@@ -364,6 +382,7 @@ abstract class DispatcherTest extends TestCase
             $r->addRoute('GET', '', 'handler0');
         };
 
+        $allowedMethods = ['GET'];
         $cases[] = ['GET', '', $callback, 'handler0', []];
 
         // 19 ----
@@ -373,6 +392,7 @@ abstract class DispatcherTest extends TestCase
             $r->addRoute('GET', '/b/{foo}', 'handler1');
         };
 
+        $allowedMethods = ['HEAD', 'GET'];
         $cases[] = ['HEAD', '/b/bar', $callback, 'handler1', ['foo' => 'bar']];
 
         // 20 ----

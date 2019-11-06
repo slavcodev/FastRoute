@@ -33,13 +33,13 @@ final class ManyRoutes extends Dispatching
         yield 'first' => [
             'method' => 'GET',
             'route' => '/abc0',
-            'result' => [Dispatcher::FOUND, ['name' => 'static-0'], []],
+            'result' => [Dispatcher::FOUND, ['name' => 'static-0'], [], ['GET']],
         ];
 
         yield 'last' => [
             'method' => 'GET',
             'route' => '/abc399',
-            'result' => [Dispatcher::FOUND, ['name' => 'static-399'], []],
+            'result' => [Dispatcher::FOUND, ['name' => 'static-399'], [], ['GET']],
         ];
 
         yield 'invalid-method' => [
@@ -57,13 +57,13 @@ final class ManyRoutes extends Dispatching
         yield 'first' => [
             'method' => 'GET',
             'route' => '/abcbar/0',
-            'result' => [Dispatcher::FOUND, ['name' => 'not-static-0'], ['foo' => 'bar']],
+            'result' => [Dispatcher::FOUND, ['name' => 'not-static-0'], ['foo' => 'bar'], ['GET']],
         ];
 
         yield 'last' => [
             'method' => 'GET',
             'route' => '/abcbar/399',
-            'result' => [Dispatcher::FOUND, ['name' => 'not-static-399'], ['foo' => 'bar']],
+            'result' => [Dispatcher::FOUND, ['name' => 'not-static-399'], ['foo' => 'bar'], ['GET']],
         ];
 
         yield 'invalid-method' => [

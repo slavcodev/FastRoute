@@ -70,13 +70,13 @@ final class RealLifeExample extends Dispatching
         yield 'first' => [
             'method' => 'GET',
             'route' => '/',
-            'result' => [Dispatcher::FOUND, ['name' => 'home'], []],
+            'result' => [Dispatcher::FOUND, ['name' => 'home'], [], ['GET']],
         ];
 
         yield 'last' => [
             'method' => 'GET',
             'route' => '/admin/category',
-            'result' => [Dispatcher::FOUND, ['name' => 'admin.category.index'], []],
+            'result' => [Dispatcher::FOUND, ['name' => 'admin.category.index'], [], ['GET', 'POST']],
         ];
 
         yield 'invalid-method' => [
@@ -94,13 +94,13 @@ final class RealLifeExample extends Dispatching
         yield 'first' => [
             'method' => 'GET',
             'route' => '/page/hello-word',
-            'result' => [Dispatcher::FOUND, ['name' => 'page.show'], ['page_slug' => 'hello-word']],
+            'result' => [Dispatcher::FOUND, ['name' => 'page.show'], ['page_slug' => 'hello-word'], ['GET']],
         ];
 
         yield 'last' => [
             'method' => 'GET',
             'route' => '/admin/category/123',
-            'result' => [Dispatcher::FOUND, ['name' => 'admin.category.show'], ['category_id' => '123']],
+            'result' => [Dispatcher::FOUND, ['name' => 'admin.category.show'], ['category_id' => '123'], ['GET']],
         ];
 
         yield 'invalid-method' => [
@@ -128,6 +128,7 @@ final class RealLifeExample extends Dispatching
                 Dispatcher::FOUND,
                 ['name' => 'shop.category.product.search'],
                 ['category_id' => '123', 'filter_by' => 'status', 'filter_value' => 'sale'],
+                ['GET'],
             ],
         ];
     }
