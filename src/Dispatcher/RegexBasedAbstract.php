@@ -33,46 +33,23 @@ abstract class RegexBasedAbstract implements Dispatcher
      */
     public function dispatch(string $httpMethod, string $uri): array
     {
-        if (isset($this->staticRouteMap[$httpMethod][$uri])) {
-            $handler = $this->staticRouteMap[$httpMethod][$uri];
-
-            return [self::FOUND, $handler, []];
-        }
-
-        $varRouteData = $this->variableRouteData;
-        if (isset($varRouteData[$httpMethod])) {
-            $result = $this->dispatchVariableRoute($varRouteData[$httpMethod], $uri);
-            if ($result[0] === self::FOUND) {
-                return $result;
-            }
+        $result = $this->resolveByMethod($httpMethod, $uri);
+        if ($result[0] === self::FOUND) {
+            return $result;
         }
 
         // For HEAD requests, attempt fallback to GET
         if ($httpMethod === 'HEAD') {
-            if (isset($this->staticRouteMap['GET'][$uri])) {
-                $handler = $this->staticRouteMap['GET'][$uri];
-
-                return [self::FOUND, $handler, []];
-            }
-            if (isset($varRouteData['GET'])) {
-                $result = $this->dispatchVariableRoute($varRouteData['GET'], $uri);
-                if ($result[0] === self::FOUND) {
-                    return $result;
-                }
+            $result = $this->resolveByMethod('GET', $uri);
+            if ($result[0] === self::FOUND) {
+                return $result;
             }
         }
 
         // If nothing else matches, try fallback routes
-        if (isset($this->staticRouteMap['*'][$uri])) {
-            $handler = $this->staticRouteMap['*'][$uri];
-
-            return [self::FOUND, $handler, []];
-        }
-        if (isset($varRouteData['*'])) {
-            $result = $this->dispatchVariableRoute($varRouteData['*'], $uri);
-            if ($result[0] === self::FOUND) {
-                return $result;
-            }
+        $result = $this->resolveByMethod('*', $uri);
+        if ($result[0] === self::FOUND) {
+            return $result;
         }
 
         // Find allowed methods for this URI by matching against all other HTTP methods as well
@@ -86,7 +63,7 @@ abstract class RegexBasedAbstract implements Dispatcher
             $allowedMethods[] = $method;
         }
 
-        foreach ($varRouteData as $method => $routeData) {
+        foreach ($this->variableRouteData as $method => $routeData) {
             if ($method === $httpMethod) {
                 continue;
             }
@@ -102,6 +79,21 @@ abstract class RegexBasedAbstract implements Dispatcher
         // If there are no allowed methods the route simply does not exist
         if ($allowedMethods !== []) {
             return [self::METHOD_NOT_ALLOWED, $allowedMethods];
+        }
+
+        return [self::NOT_FOUND];
+    }
+
+    private function resolveByMethod(string $httpMethod, string $uri): array
+    {
+        if (isset($this->staticRouteMap[$httpMethod][$uri])) {
+            $handler = $this->staticRouteMap[$httpMethod][$uri];
+
+            return [self::FOUND, $handler, []];
+        }
+
+        if (isset($this->variableRouteData[$httpMethod])) {
+            return $this->dispatchVariableRoute($this->variableRouteData[$httpMethod], $uri);
         }
 
         return [self::NOT_FOUND];
